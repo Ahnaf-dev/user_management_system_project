@@ -57,6 +57,49 @@ router.post("/register", async (req, res) => {
   }
 });
 
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const userResponse = await pool.query(
+      "SELECT id, username, role, password FROM users WHERE username = $1",
+      [username]
+    );
+
+    let usernameDoesNotExist = !userResponse.rows.length;
+
+    if (usernameDoesNotExist) {
+      return res.status(400).json({
+        message:
+          "Invalid username, please try again or register a new account.",
+      });
+    }
+
+    const user = userResponse.rows[0];
+
+    const verifyPassword = await bcrypt.compare(password, user.password);
+
+    let invalidPassword = !verifyPassword;
+
+    if (invalidPassword) {
+      return res.status(400).json({ message: "Password does not match." });
+    }
+
+    let accessToken = generateToken("access", { id: user.id });
+    let refreshToken = generateToken("refresh", { id: user.id });
+
+    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+
+    return res.status(201).json({
+      accessToken,
+      user: { username: user.username, role: user.role },
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+});
+
 function generateToken(type, data) {
   if (type === "access") {
     return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {
