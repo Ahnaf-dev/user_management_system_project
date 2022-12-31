@@ -117,6 +117,52 @@ router.post("/login", async (req, res) => {
   }
 });
 
+router.delete("/logout", authMiddleware, async (req, res) => {
+  const userID = req.user.id;
+  let refreshToken = req.cookies?.refreshToken;
+
+  let hasValidToken = await pool.query(
+    "SELECT token from refresh_tokens WHERE user_id = $1 AND valid = true",
+    [userID]
+  );
+
+  if (hasValidToken.rows.length) {
+    res.clearCookie("refreshToken");
+
+    await pool.query(
+      "UPDATE refresh_tokens SET valid = false WHERE token = $1",
+      [refreshToken]
+    );
+
+    return res.status(200).json({ message: "Succesfully logged out" });
+  } else {
+    return res.status(400).json({ message: "Invalid Credentials" });
+  }
+});
+
+router.post("/refresh-token", async (req, res) => {
+  let refreshToken = req.cookies?.refreshToken;
+
+  let hasValidToken = await pool.query(
+    "SELECT token, user_id from refresh_tokens WHERE token = $1 AND valid = true",
+    [refreshToken]
+  );
+
+  if (hasValidToken.rows.length) {
+    let userID = hasValidToken.rows[0].user_id;
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+      if (err) return res.status(400).json({ message: "Invalid Token" });
+
+      let accessToken = generateToken("access", { id: user.id });
+      console.log(user.id);
+      res.status(200).json({ accessToken });
+    });
+  } else {
+    res.status(400).json({ message: "Invalid Token" });
+  }
+});
+
 router.get("/me", authMiddleware, async (req, res) => {
   const userID = req.user.id;
 
