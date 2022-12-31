@@ -119,27 +119,6 @@ router.post("/login", async (req, res) => {
 
 router.delete("/logout", authMiddleware, async (req, res) => {
   revokeTokens(true, req.user.id, req.cookies?.refreshToken, req, res);
-
-  // const userID = req.user.id;
-  // let refreshToken = req.cookies?.refreshToken;
-
-  // let hasValidToken = await pool.query(
-  //   "SELECT token from refresh_tokens WHERE user_id = $1 AND valid = true",
-  //   [userID]
-  // );
-
-  // if (hasValidToken.rows.length) {
-  //   res.clearCookie("refreshToken");
-
-  //   await pool.query(
-  //     "UPDATE refresh_tokens SET valid = false WHERE token = $1",
-  //     [refreshToken]
-  //   );
-
-  //   return res.status(200).json({ message: "Succesfully logged out" });
-  // } else {
-  //   return res.status(400).json({ message: "Invalid Credentials" });
-  // }
 });
 
 router.post("/refresh-token", async (req, res) => {
@@ -166,24 +145,29 @@ router.post("/refresh-token", async (req, res) => {
 
 router.post("/revoke-token", authMiddleware, async (req, res) => {
   revokeTokens(false, req.user.id, req.cookies?.refreshToken, req, res);
-  // const userID = req.user.id;
-  // let refreshToken = req.cookies?.refreshToken;
+});
 
-  // let hasValidToken = await pool.query(
-  //   "SELECT token from refresh_tokens WHERE user_id = $1 AND valid = true",
-  //   [userID]
-  // );
+router.get("/refresh-tokens", async (req, res) => {
+  const { userId, isValid } = req.query;
 
-  // if (hasValidToken.rows.length) {
-  //   await pool.query(
-  //     "UPDATE refresh_tokens SET valid = false WHERE token = $1",
-  //     [refreshToken]
-  //   );
+  if ((userId && isValid) || isValid === false) {
+    let response = await pool.query(
+      "SELECT token, valid FROM refresh_tokens WHERE user_id = $1 AND valid = $2",
+      [userId, isValid]
+    );
 
-  //   return res.status(200).json({ message: "Revoked Refresh Token" });
-  // } else {
-  //   return res.status(400).json({ message: "Invalid Credentials" });
-  // }
+    if (response.rows.length) {
+      let responseTokens = response.rows;
+      res.status(200).json({ responseTokens });
+    } else {
+      return res.status(400).json({ message: "Invalid UserID" });
+    }
+  } else {
+    return res.status(400).json({
+      message:
+        "Please send query string ?userId=userIDValue&isValid=booleanValue",
+    });
+  }
 });
 
 router.get("/me", authMiddleware, async (req, res) => {
@@ -221,15 +205,13 @@ async function revokeTokens(clearCookie, id, token, req, res) {
       "UPDATE refresh_tokens SET valid = false WHERE token = $1",
       [refreshToken]
     );
-    return res
-      .status(200)
-      .json({
-        message: `${
-          clearCookie
-            ? "You have succesfully logged out!"
-            : "Revoked Refresh Token"
-        }`,
-      });
+    return res.status(200).json({
+      message: `${
+        clearCookie
+          ? "You have succesfully logged out!"
+          : "Revoked Refresh Token"
+      }`,
+    });
   } else {
     return res.status(400).json({ message: "Invalid Credentials" });
   }
