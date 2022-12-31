@@ -147,29 +147,6 @@ router.post("/revoke-token", authMiddleware, async (req, res) => {
   revokeTokens(false, req.user.id, req.cookies?.refreshToken, req, res);
 });
 
-router.get("/refresh-tokens", async (req, res) => {
-  const { userId, isValid } = req.query;
-
-  if ((userId && isValid) || isValid === false) {
-    let response = await pool.query(
-      "SELECT token, valid FROM refresh_tokens WHERE user_id = $1 AND valid = $2",
-      [userId, isValid]
-    );
-
-    if (response.rows.length) {
-      let responseTokens = response.rows;
-      res.status(200).json({ responseTokens });
-    } else {
-      return res.status(400).json({ message: "Invalid UserID" });
-    }
-  } else {
-    return res.status(400).json({
-      message:
-        "Please send query string ?userId=userIDValue&isValid=booleanValue",
-    });
-  }
-});
-
 router.get("/me", authMiddleware, async (req, res) => {
   const userID = req.user.id;
 
