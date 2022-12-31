@@ -6,7 +6,6 @@ CREATE DATABASE user_management_project;
 \connect user_management_project;
 
 
-/* creates datatype that only allows the following strings*/
 CREATE TYPE roles as ENUM ('User', 'Admin', 'Ghost');
 
 CREATE TABLE users (

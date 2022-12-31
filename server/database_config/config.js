@@ -1,4 +1,5 @@
 // configure settings after creating database from server/database.sql
+// user, host and port are set on postgre defaults
 
 const Pool = require("pg").Pool;
 
