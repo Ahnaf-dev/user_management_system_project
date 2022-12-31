@@ -19,5 +19,6 @@ CREATE TABLE users (
 CREATE TABLE refresh_tokens (
   id BIGSERIAL NOT NULL PRIMARY KEY,
   token text NOT NULL,
-  user_id BIGSERIAL references users(id)
+  valid boolean NOT NULL,
+  user_id BIGSERIAL references users(id) NOT NULL
 );

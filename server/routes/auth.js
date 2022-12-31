@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const pool = require("../database_config/config");
 const isEnumMatched = require("../utils/isEnumMatched");
+const generateToken = require("../utils/generateToken");
+const authMiddleware = require("../auth_middleware/auth_middleware");
 
 const router = express.Router();
 
@@ -44,6 +46,11 @@ router.post("/register", async (req, res) => {
 
     let accessToken = generateToken("access", { id: user.id });
     let refreshToken = generateToken("refresh", { id: user.id });
+
+    await pool.query(
+      "INSERT INTO refresh_tokens(token, valid, user_id) VALUES ($1, $2, $3)",
+      [refreshToken, true, user.id]
+    );
 
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
@@ -88,6 +95,16 @@ router.post("/login", async (req, res) => {
     let accessToken = generateToken("access", { id: user.id });
     let refreshToken = generateToken("refresh", { id: user.id });
 
+    let invalidatePreviousRefreshTokens = await pool.query(
+      "UPDATE refresh_tokens SET valid = false WHERE user_id = $1",
+      [user.id]
+    );
+
+    await pool.query(
+      "INSERT INTO refresh_tokens(token, valid, user_id) VALUES ($1, $2, $3)",
+      [refreshToken, true, user.id]
+    );
+
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
     return res.status(201).json({
@@ -100,16 +117,21 @@ router.post("/login", async (req, res) => {
   }
 });
 
-function generateToken(type, data) {
-  if (type === "access") {
-    return jwt.sign(data, process.env.ACCESS_TOKEN_SECRET, {
-      expiresIn: "10m",
-    });
+router.get("/me", authMiddleware, async (req, res) => {
+  const userID = req.user.id;
+
+  const userResponse = await pool.query(
+    "SELECT id, name, username, role FROM users WHERE id = $1",
+    [userID]
+  );
+
+  if (userResponse.rows.length) {
+    let userDetails = userResponse.rows[0];
+
+    return res.status(200).json({ user: userDetails });
   } else {
-    return jwt.sign(data, process.env.REFRESH_TOKEN_SECRET, {
-      expiresIn: "7d",
-    });
+    return res.status(401).json({ message: "Invalid Credentials" });
   }
-}
+});
 
 module.exports = router;
