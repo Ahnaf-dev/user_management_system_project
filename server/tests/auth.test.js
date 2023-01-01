@@ -1,8 +1,8 @@
 const request = require("supertest");
 const app = require("../app-test");
 
-// remove .skip when wanting to test register
-describe.skip("POST api/auth/register", () => {
+// add .skip (describe.skip) when testing register more than first time
+describe("POST api/auth/register", () => {
   describe("when register info is given with a unique username", () => {
     it("should return status code of 201", async () => {
       // will only return valid when first time register, change username during re-tests
