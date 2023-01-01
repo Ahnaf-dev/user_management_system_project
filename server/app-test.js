@@ -6,6 +6,11 @@ let port = process.env.PORT || 4000;
 
 app.use(express.json());
 app.use(cookieParser());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
@@ -21,4 +26,4 @@ app.use((err, req, res, next) => {
   next();
 });
 
-app.listen(port, () => console.log(`Succesfully Connected To Port: ${port}`));
+module.exports = app;

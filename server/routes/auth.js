@@ -123,7 +123,6 @@ router.delete("/logout", authMiddleware, async (req, res) => {
 
 router.post("/refresh-token", async (req, res) => {
   let refreshToken = req.cookies?.refreshToken;
-
   let hasValidToken = await pool.query(
     "SELECT token, user_id from refresh_tokens WHERE token = $1 AND valid = true",
     [refreshToken]
