@@ -8,11 +8,11 @@ To run the project and test the API, we must go through the following steps.
 
 1. Download GitHub Repo as a zip, extract it and open it in a code editor.
 2. Make sure you have NodeJS installed (https://nodejs.org/en/) and type npm install on the root folder in a terminal to install the neccesary dependencies of this project.
-3. Install PostgreSQL
-4. Locally setup the database and tables
-5. Configure database settings
-6. Run node server
-7. Test the API
+3. Install PostgreSQL.
+4. Locally setup the database and tables.
+5. Configure database settings.
+6. Run node server.
+7. Test the API.
 
 ### Installing PostgreSQL
 
