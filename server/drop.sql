@@ -2,4 +2,4 @@
 
 \connect postgres;
 
-DELETE DATABASE user_management_project;
+DROP DATABASE user_management_project;
