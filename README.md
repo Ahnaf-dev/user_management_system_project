@@ -1,4 +1,6 @@
-# user_management_system_project
+# User Management System Project
+
+An authentication project with JWT refresh tokens, PostgreSQL and NodeJS.
 
 ## Instructions To Run Locally
 
