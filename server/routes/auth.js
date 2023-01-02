@@ -247,6 +247,16 @@ module.exports = router;
  *      properties:
  *        message:
  *         type: string
+ *    RevokedResponse:
+ *      type: object
+ *      properties:
+ *        message:
+ *         type: string
+ *    TokenResponse:
+ *      type: object
+ *      properties:
+ *        accessToken:
+ *         type: string
  *
  */
 
@@ -254,7 +264,7 @@ module.exports = router;
  * @swagger
  * /api/auth/register:
  *  post:
- *   summary: register an user and get details + access token
+ *   summary: Register an user and get details + access token.
  *   requestBody:
  *    required: true
  *    content:
@@ -277,7 +287,7 @@ module.exports = router;
  * @swagger
  * /api/auth/login:
  *  post:
- *   summary: login an user and get details + access token
+ *   summary: login an user and get details + access token.
  *   requestBody:
  *    required: true
  *    content:
@@ -302,7 +312,7 @@ module.exports = router;
  * @swagger
  * /api/auth/logout:
  *  delete:
- *   summary: logout user
+ *   summary: Logout user.
  *   parameters:
  *    - name: test-auth
  *      in: header
@@ -326,7 +336,7 @@ module.exports = router;
  * @swagger
  * /api/auth/me:
  *  get:
- *   summary: get user details
+ *   summary: Get user details.
  *   parameters:
  *    - name: test-auth
  *      in: header
@@ -341,6 +351,49 @@ module.exports = router;
  *               $ref: '#/components/schemas/UserDetails'
  *      401:
  *        description: Invalid User
+ *      500:
+ *         description: Some server error
+ *
+ */
+
+/**
+ * @swagger
+ * /api/auth/refresh-token:
+ *  post:
+ *   summary: Refreshes access token when user has valid refresh token as a cookie from logging in or register.
+ *
+ *   responses:
+ *      200:
+ *         description: New Access Token Granted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TokenResponse'
+ *      400:
+ *        description: Invalid Token
+ *
+ *
+ */
+
+/**
+ * @swagger
+ * /api/auth/revoke-token:
+ *  post:
+ *   summary: Revoke Token.
+ *   parameters:
+ *    - name: test-auth
+ *      in: header
+ *      type: string
+ *      description: set access token value that you get from login or register such as eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjIiLCJpYXQiOjE2NzI2MzA3OTcsImV4cCI6MTY3MjYzMTM5N30.29gATlQrGAA6Jybr2ZIPWGwdAuK949RqWpU2j-a3f1I
+ *   responses:
+ *      200:
+ *         description: Revoked Token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RevokedResponse'
+ *      400:
+ *        description: Invalid Credentials
  *      500:
  *         description: Some server error
  *

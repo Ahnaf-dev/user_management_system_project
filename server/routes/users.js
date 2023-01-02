@@ -38,12 +38,10 @@ router.get("/refresh-tokens", async (req, res) => {
       let responseTokens = response.rows;
       res.status(200).json({ responseTokens });
     } else {
-      return res
-        .status(400)
-        .json({
-          message:
-            "No Data Present (Invalid userID or no valid / invalid tokens)",
-        });
+      return res.status(400).json({
+        message:
+          "No Data Present (Invalid userID or no valid / invalid tokens)",
+      });
     }
   } else {
     return res.status(400).json({
@@ -54,3 +52,76 @@ router.get("/refresh-tokens", async (req, res) => {
 });
 
 module.exports = router;
+
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    ResponseTokens:
+ *      type: object
+ *      properties:
+ *        responseTokens:
+ *         type: string
+ *    AdminResponse:
+ *     type: object
+ *     properties:
+ *       message:
+ *        type: string
+ */
+
+/**
+ * @swagger
+ * /api/users/:
+ *  get:
+ *   summary: Can be accessed by admin
+ *   parameters:
+ *    - name: test-auth
+ *      in: header
+ *      type: string
+ *      description: set access token value from login or register
+ *    - in: query
+ *      name: loginDate
+ *      type: string
+ *      description: any string
+ *   responses:
+ *      200:
+ *         description: Access Granted
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AdminResponse'
+ *      400:
+ *        description: Not admin or invalid query
+ *      500:
+ *         description: Some server error
+ *
+ */
+
+/**
+ * @swagger
+ * /api/users/refresh-tokens:
+ *  get:
+ *   summary: Get refresh tokens of an user.
+ *   parameters:
+ *      - in: query
+ *        name: userId
+ *        type: string
+ *        description: Valid user ID, you can get from SELECT * FROM users;
+ *      - in: query
+ *        name: isValid
+ *        type: boolean
+ *        default: true
+ *        description: Get valid or invalid tokens based on boolean value
+ *   responses:
+ *      200:
+ *         description: User Details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ResponseTokens'
+ *      400:
+ *        description: Invalid data or query string
+ *      500:
+ *         description: Some server error
+ *
+ */
