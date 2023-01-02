@@ -8,6 +8,85 @@ const authMiddleware = require("../auth_middleware/auth_middleware");
 
 const router = express.Router();
 
+/**
+ * @swagger
+ * components:
+ *  schemas:
+ *    RegisterResponse:
+ *      type: object
+ *      properties:
+ *        accessToken:
+ *          type: string
+ *        user:
+ *          type: object
+ *          properties:
+ *            username:
+ *              type: string
+ *            role:
+ *              type: string
+ *    UserDetails:
+ *      type: object
+ *      properties:
+ *        user:
+ *          type: object
+ *          properties:
+ *            id:
+ *              type: string
+ *            name:
+ *              type: string
+ *            username:
+ *              type: string
+ *            role:
+ *              type: string
+ *    RegisterBody:
+ *      type: object
+ *      properties:
+ *        name:
+ *         type: string
+ *        username:
+ *         type: string
+ *        password:
+ *         type: string
+ *        role:
+ *         type: string
+ *    LoginBody:
+ *      type: object
+ *      properties:
+ *        username:
+ *         type: string
+ *        password:
+ *         type: string
+ *    LogoutResponse:
+ *      type: object
+ *      properties:
+ *        message:
+ *         type: string
+ *
+ */
+
+/**
+ * @swagger
+ * /api/auth/register:
+ *  post:
+ *   summary: register an user and get details + access token
+ *   requestBody:
+ *    required: true
+ *    content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/RegisterBody'
+ *   responses:
+ *      200:
+ *         description: User Succesfully Registered
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegisterResponse'
+ *      500:
+ *         description: Some server error
+ *
+ */
+
 router.post("/register", async (req, res) => {
   const { name, username, password, role } = req.body;
 
@@ -64,6 +143,30 @@ router.post("/register", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/login:
+ *  post:
+ *   summary: login an user and get details + access token
+ *   requestBody:
+ *    required: true
+ *    content:
+ *      application/json:
+ *       schema:
+ *        $ref: '#/components/schemas/LoginBody'
+ *   responses:
+ *      200:
+ *         description: User Succesfully Logged In
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/RegisterResponse'
+ *      400:
+ *        description: Invalid User or Password
+ *      500:
+ *         description: Some server error
+ *
+ */
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
@@ -117,6 +220,30 @@ router.post("/login", async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/auth/logout:
+ *  delete:
+ *   summary: logout user
+ *   parameters:
+ *    - name: test-auth
+ *      in: header
+ *      type: string
+ *      description: set access token value that you get from login or register
+ *   responses:
+ *      200:
+ *         description: Logged Out
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LogoutResponse'
+ *      400:
+ *        description: Invalid Credentials
+ *      500:
+ *         description: Some server error
+ *
+ */
+
 router.delete("/logout", authMiddleware, async (req, res) => {
   revokeTokens(true, req.user.id, req.cookies?.refreshToken, req, res);
 });
@@ -145,6 +272,30 @@ router.post("/refresh-token", async (req, res) => {
 router.post("/revoke-token", authMiddleware, async (req, res) => {
   revokeTokens(false, req.user.id, req.cookies?.refreshToken, req, res);
 });
+
+/**
+ * @swagger
+ * /api/auth/me:
+ *  get:
+ *   summary: get user details
+ *   parameters:
+ *    - name: test-auth
+ *      in: header
+ *      type: string
+ *      description: set access token value that you get from login or register
+ *   responses:
+ *      200:
+ *         description: User Details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserDetails'
+ *      401:
+ *        description: Invalid User
+ *      500:
+ *         description: Some server error
+ *
+ */
 
 router.get("/me", authMiddleware, async (req, res) => {
   const userID = req.user.id;

@@ -1,12 +1,45 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
-const app = express();
 let port = process.env.PORT || 4000;
+const swaggerUI = require("swagger-ui-express");
+const swaggerJsDoc = require("swagger-jsdoc");
+
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "User Management API",
+      version: "1.0.0",
+      description:
+        "A user management API created with NodeJS that implements JWT auth, all data stored in a postgreSQL database.",
+    },
+    servers: [
+      {
+        url: `http://localhost:${port}`,
+      },
+    ],
+  },
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+  apis: ["server/routes/*.js"],
+};
+
+const specs = swaggerJsDoc(options);
+
+const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(specs));
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/users", require("./routes/users"));
 
