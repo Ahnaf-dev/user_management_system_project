@@ -11,7 +11,7 @@ describe("GET /api/users/refresh-tokens", () => {
       });
 
       // Type SELECT * FROM users; on psql shell to get a valid user ID
-      const validID = 4; // set valid ID manually
+      const validID = 1; // set valid ID manually
       const response = await request(app).get(
         `/api/users/refresh-tokens?userId=${validID}&isValid=true`
       );
