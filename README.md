@@ -11,8 +11,11 @@ To run the project and test the API, we must go through the following steps.
 3. Install PostgreSQL.
 4. Locally setup the database and tables.
 5. Configure database settings.
-6. Run node server.
-7. Test the API.
+6. Install Redis, run redis server.
+7. Run node server.
+8. Test the API.
+
+**Note**: If running into errors because of redis or it is not working, I have made a repo where Redis is not used so redis is not required to run in that repo. 
 
 ### Installing PostgreSQL
 
