@@ -49,9 +49,7 @@ describe("GET /api/users?loginDate=aDate", () => {
         .get("/api/users?loginDate=213")
         .set("Authorization", accessToken);
 
-      expect(loginDateResponse.body.message).toBe(
-        "Admin verified, access granted."
-      );
+      expect(loginDateResponse.body.length).toBeGreaterThan(0);
     });
   });
 

@@ -22,3 +22,10 @@ CREATE TABLE refresh_tokens (
   valid boolean NOT NULL,
   user_id BIGSERIAL references users(id) NOT NULL
 );
+
+CREATE TABLE first_login (
+  id BIGSERIAL NOT NULL PRIMARY KEY,
+  firstlogin text NOT NULL,
+  user_id BIGSERIAL references users(id) NOT NULL
+
+);

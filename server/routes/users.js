@@ -14,7 +14,28 @@ router.get("/", authMiddleware, async (req, res) => {
     let userRole = response.rows[0];
 
     if (userRole.role === "Admin") {
-      res.status(200).json({ message: "Admin verified, access granted." });
+      let users = await pool.query(
+        "SELECT user_id, role, firstlogin FROM first_login INNER JOIN users on users.id = user_id"
+      );
+
+      let onlyUsers = users.rows.filter((user) => user.role === "User");
+
+      let checkStatus = onlyUsers.map((user) => {
+        let status;
+        let hour = new Date(user.firstlogin).getHours();
+
+        if (hour > 10) {
+          status = "Absent";
+        } else if (hour > 9) {
+          status = "Late";
+        } else if (hour <= 9) {
+          status = "Intime";
+        }
+
+        return { ...user, status };
+      });
+
+      res.status(200).json(checkStatus);
     } else {
       res.status(400).json({ message: "Access denied, unauthorized." });
     }
@@ -63,9 +84,17 @@ module.exports = router;
  *        responseTokens:
  *         type: string
  *    AdminResponse:
- *     type: object
- *     properties:
- *       message:
+ *     type: array
+ *     items:
+ *      type: object
+ *      properties:
+ *       user_id:
+ *        type: string
+ *       role:
+ *        type: string
+ *       firstlogin:
+ *        type: string
+ *       status:
  *        type: string
  */
 

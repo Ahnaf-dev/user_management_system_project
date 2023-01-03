@@ -92,6 +92,18 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Password does not match." });
     }
 
+    let checkFirstLoginDate = await pool.query(
+      "SELECT * FROM first_login WHERE user_id = $1",
+      [user.id]
+    );
+
+    if (!checkFirstLoginDate.rows.length) {
+      await pool.query(
+        "INSERT INTO first_login(firstlogin, user_id) VALUES($1, $2)",
+        [new Date(), user.id]
+      );
+    }
+
     let accessToken = generateToken("access", { id: user.id });
     let refreshToken = generateToken("refresh", { id: user.id });
 
