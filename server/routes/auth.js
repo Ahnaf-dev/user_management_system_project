@@ -5,8 +5,14 @@ const pool = require("../database_config/config");
 const isEnumMatched = require("../utils/isEnumMatched");
 const generateToken = require("../utils/generateToken");
 const authMiddleware = require("../auth_middleware/auth_middleware");
-
+const Redis = require("redis");
 const router = express.Router();
+
+const redisClient = Redis.createClient({
+  legacyMode: true,
+});
+redisClient.connect();
+const REDIS_EXPIRATION = 3600;
 
 router.post("/register", async (req, res) => {
   const { name, username, password, role } = req.body;
@@ -54,10 +60,26 @@ router.post("/register", async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
-    return res.status(201).json({
+    const userDataWithAccessToken = {
       accessToken,
       user: { username: user.username, role: user.role },
-    });
+    };
+
+    // Redis Example
+
+    redisClient.setEx(
+      "usersDataWithAccessToken",
+      REDIS_EXPIRATION,
+      JSON.stringify(userDataWithAccessToken)
+    );
+
+    redisClient.setEx(
+      "refreshToken",
+      REDIS_EXPIRATION,
+      JSON.stringify({ refreshToken })
+    );
+
+    return res.status(201).json(userDataWithAccessToken);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server Error" });
@@ -119,10 +141,24 @@ router.post("/login", async (req, res) => {
 
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
-    return res.status(201).json({
+    const userDataWithAccessToken = {
       accessToken,
       user: { username: user.username, role: user.role },
-    });
+    };
+
+    redisClient.setEx(
+      "usersDataWithAccessToken",
+      REDIS_EXPIRATION,
+      JSON.stringify(userDataWithAccessToken)
+    );
+
+    redisClient.setEx(
+      "refreshToken",
+      REDIS_EXPIRATION,
+      JSON.stringify({ refreshToken })
+    );
+
+    return res.status(201).json(userDataWithAccessToken);
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Server Error" });
@@ -161,18 +197,34 @@ router.post("/revoke-token", authMiddleware, async (req, res) => {
 router.get("/me", authMiddleware, async (req, res) => {
   const userID = req.user.id;
 
-  const userResponse = await pool.query(
-    "SELECT id, name, username, role FROM users WHERE id = $1",
-    [userID]
-  );
+  redisClient.get(`user-${userID}`, async (error, user) => {
+    if (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Server Error" });
+    }
+    if (user != null) {
+      return res.status(200).json(JSON.parse(user));
+    } else {
+      const userResponse = await pool.query(
+        "SELECT id, name, username, role FROM users WHERE id = $1",
+        [userID]
+      );
 
-  if (userResponse.rows.length) {
-    let userDetails = userResponse.rows[0];
+      if (userResponse.rows.length) {
+        let userDetails = userResponse.rows[0];
 
-    return res.status(200).json({ user: userDetails });
-  } else {
-    return res.status(401).json({ message: "Invalid Credentials" });
-  }
+        redisClient.setEx(
+          `user-${userID}`,
+          REDIS_EXPIRATION,
+          JSON.stringify({ user: userDetails })
+        );
+
+        return res.status(200).json({ user: userDetails });
+      } else {
+        return res.status(401).json({ message: "Invalid Credentials" });
+      }
+    }
+  });
 });
 
 async function revokeTokens(clearCookie, id, token, req, res) {
