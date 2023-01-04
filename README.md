@@ -1,6 +1,6 @@
 # User Management System Project
 
-An authentication project with JWT refresh tokens, PostgreSQL and NodeJS.
+An authentication project with JWT refresh tokens, PostgreSQL, Redis and NodeJS.
 
 ## Instructions To Run Locally
 
@@ -11,13 +11,13 @@ To run the project and test the API, we must go through the following steps.
 3. Install PostgreSQL.
 4. Locally setup the database and tables.
 5. Configure database settings.
-6. Install Redis, run redis server.
+6. Install Redis, run redis server. (https://github.com/Ahnaf-dev/user_management_project_without_redis for project without having to install and run redis)
 7. Run node server.
 8. Test the API.
 
-**Note**: If running into errors because of redis or it is not working, I have made a repo where Redis is not used so redis is not required to run in that repo. 
-
 ### Installing PostgreSQL
+
+Once you have done steps 1-2, you will know you have installed the dependencies when a folder named "node_modules" is created.
 
 For the API endpoints to work, you need to locally setup PostgreSQL. Here is a short video on how to install PostgreSQL and to get comfortable with the SQL shell (psql)
 https://www.youtube.com/watch?v=BLH3s5eTL4Y
@@ -36,15 +36,44 @@ Here the user, host and port are set to PostgreSQL defaults, you need to enter y
 
 ![image](https://user-images.githubusercontent.com/52428475/210264260-b2c80232-0434-4f4e-8a54-871db578b94b.png)
 
+### Installing Redis And Running Redis Server
+
+**Installing Redis**
+
+To install redis, head to https://redis.io/download/
+
+To install on windows, install the .msi file from https://github.com/tporadowski/redis/releases
+
+For a short video on installing Redis on windows, https://www.youtube.com/watch?v=4ePdm4AyL0
+
+**Running Redis Server**
+
+Open the redis directory in a terminal, it is usually at "C:\Program Files\Redis".
+
+![image](https://user-images.githubusercontent.com/52428475/210463051-8b32fa71-d369-4189-915f-25d6b13f9d64.png)
+
+Now if you enter redis-server.exe, it will open the redis server with the following message.
+
+![image](https://user-images.githubusercontent.com/52428475/210463134-f631ffb9-6fa2-48fc-8258-8610e982e664.png)
+
+
 ### Running Node Server
 
-Now when you have configured the settings to connect to your local database, you may start the server. To start the server, type npm run dev in the terminal or npm run start. It should say Succesfully connected to port 5000 when it is succesfully ran.
+Now when you have configured the settings to connect to your local database and ran redis server, you may start the server. To start the server, type npm run dev in the terminal or npm run start. It should say Succesfully connected to port 5000 when it is succesfully ran.
 
 ![image](https://user-images.githubusercontent.com/52428475/210264546-460a14b0-453f-4829-a2dc-bdbd1b351a9c.png)
 
 ### Testing API
 
-If all the above steps went correctly, the API endpoints should be able to work. So now you can test the API. 
+Now you should have
+
+1. Installed node dependencies as evident by the folder named "node_modules"
+2. Created local postgreSQL database and tables from database.sql.
+3. Configured the settings for nodeJS server to connect to your postgreSQL database.
+4. Ran the Redis server.
+5. Ran the nodeJS server.
+
+If all the above are met, the API endpoints will not give any errors and you will be able to test the API.
 
 There are many ways to test the API, the easiest option would be to head over to http://localhost:5000/api-docs/ where everything is setup for testing.
 
